@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 #file_path = "test_data/1727320101-665925967.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\data\\01_straight_walk\\pcd\\pcd_000001.pcd"
-
+file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-665925967.pcd"
 
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
@@ -28,15 +27,15 @@ plane_model, inliers = ror_pcd.segment_plane(distance_threshold=0.1,
 print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
 
 # 도로에 속하는 포인트 (inliers)
-road_pcd = ror_pcd.select_by_index(inliers)
+#road_pcd = ror_pcd.select_by_index(inliers)
 
 # 도로에 속하지 않는 포인트 (outliers)
 non_road_pcd = ror_pcd.select_by_index(inliers, invert=True)
 
 # 도로 영역을 빨간색으로 표시
-road_pcd.paint_uniform_color([1, 0, 0])  # 빨간색으로 표시
+#road_pcd.paint_uniform_color([1, 0, 0])  # 빨간색으로 표시
 # 도로가 아닌 포인트를 초록색으로 표시
-non_road_pcd.paint_uniform_color([0, 1, 0])  # 녹색으로 표시
+non_road_pcd.paint_uniform_color([0, 0, 0])  # 녹색으로 표시
 
 # 포인트 클라우드 시각화 함수
 def visualize_point_clouds(pcd_list, window_name="Point Cloud Visualization", point_size=1.0):
@@ -49,6 +48,6 @@ def visualize_point_clouds(pcd_list, window_name="Point Cloud Visualization", po
     vis.destroy_window()
 
 # 두 영역을 동시에 시각화 (포인트 크기를 원하는 크기로 조절 가능)
-visualize_point_clouds([road_pcd, non_road_pcd], 
+visualize_point_clouds([non_road_pcd], 
                        window_name="Road (Red) and Non-Road (Green) Points", point_size=2.0)
 
