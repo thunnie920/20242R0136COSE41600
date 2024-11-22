@@ -8,9 +8,8 @@ from sklearn.linear_model import LinearRegression
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 # file_path = "test_data/1727320101-665925967.pcd"
-# file_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd\\pcd_000002.pcd"
-# file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-665925967.pcd"
-# E:\Desktop\selfdrivingCars\COSE416_HW1_tutorial\test_data\1727320101-961578277.pcd
+# file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
+
 file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
 # PCD 파일 읽기
@@ -127,20 +126,27 @@ colors = plt.get_cmap("tab20")(labels / (max_label + 1 if max_label > 0 else 1))
 colors[labels < 0] = 0  # 노이즈는 검정색으로 표시
 final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
-# 사람 탐지 필터링 기준
+# 필터링 기준 1. 사람 탐지 필터링 기준
 min_points_in_cluster = 50   # 클러스터 내 최소 포인트 수
 max_points_in_cluster = 300  # 클러스터 내 최대 포인트 수
 
-# 사람의 높이 (Z 값 범위)
+# 필터링 기준 2. 사람의 높이 (Z 값 범위)
 min_height = 1.5   # 최소 높이 (사람)
 max_height = 2.0   # 최대 높이 (사람)
 
-# 사람의 너비 및 깊이 (XY 평면에서의 범위)
+# 필터링 기준 3. 사람의 너비 및 깊이 (XY 평면에서의 범위)
 min_size = 0.3     # 최소 너비/깊이
 max_size = 0.7     # 최대 너비/깊이
 
+# 필터링 기준 4. 너무 멀리 있는 객체는 탐지 안 함
 max_distance = 70.0   # 원점으로부터의 최대 거리
 aspect_ratio_threshold = 2.5  # Z축 길이 / XY 평면 크기의 최소 비율
+
+# 필터링 기준 5. 밀도가 높은 객체만 남김
+density_limit = 50
+
+sum_density = 0
+
 
 # 1번, 2번, 3번 조건을 모두 만족하는 클러스터 필터링 및 바운딩 박스 생성
 # 바운딩 박스를 저장할 리스트
@@ -206,4 +212,4 @@ def visualize_with_bounding_boxes(pcd, bounding_boxes, window_name="Filtered Clu
 
 
 # 시각화 (포인트 크기를 원하는 크기로 조절 가능)
-# visualize_with_bounding_boxes(final_point, person_bboxes, point_size=2.0, width=1920, height=1080, filename="camera_params.json")
+visualize_with_bounding_boxes(final_point, person_bboxes, point_size=2.0, width=1920, height=1080, filename="camera_params.json")
