@@ -8,9 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 # file_path = "test_data/1727320101-665925967.pcd"
-# file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
 
-file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
+# file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
@@ -28,7 +28,7 @@ distances, _ = nbrs.kneighbors(sampled_points)
 mean_distance = np.mean(distances[:, 1])
 
 # voxel_size를 평균 거리의 비율로 설정
-voxel_size = mean_distance * 0.5
+voxel_size = mean_distance * 0.25
 print(f"Calculated voxel_size: {voxel_size}")
 
 # Voxel Downsampling 수행
@@ -56,12 +56,12 @@ print(f"최적의 nb_points: {optimal_nb_points}, 비율: {best_ratio:.2f}")
 
 # Radius Outlier Removal (ROR) 적용
 #cl, ind = downsample_pcd.remove_radius_outlier(nb_points=optimal_nb_points, radius=1.2)
-cl, ind = downsample_pcd.remove_radius_outlier(nb_points=8, radius=1.5)
+cl, ind = downsample_pcd.remove_radius_outlier(nb_points=5, radius=2.0)
 ror_pcd = downsample_pcd.select_by_index(ind)
 
 # RANSAC을 사용하여 초기 평면 추정
 plane_model, inliers = ror_pcd.segment_plane(distance_threshold=0.1,
-                                             ransac_n=3,
+                                             ransac_n=5,
                                              num_iterations=2000)
 
 # 인라이어 점 추출

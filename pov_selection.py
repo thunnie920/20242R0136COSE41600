@@ -3,7 +3,9 @@ import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
 
-file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
+# file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
+
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
 
