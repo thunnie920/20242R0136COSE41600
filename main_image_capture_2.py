@@ -8,10 +8,10 @@ from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
 
 # 경로 설정
-data_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd"  # PCD 파일들이 있는 폴더
+data_path = "E:\\Desktop\\selfdrivingCars\\data\\07_straight_walk\\pcd"  # PCD 파일들이 있는 폴더
 # data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
-output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\01_straight_walk"  # 저장할 폴더
-# output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data" 
+output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\07_straight_walk"  # 저장할 폴더
+# output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_3" 
 
 # 초기화
 prev_bboxes = []  # 이전 바운딩 박스 리스트
@@ -19,12 +19,12 @@ prev_centroids = []  # 이전 클러스터 중심점 리스트
 movement_threshold = 0.1  # 움직임으로 간주할 최소 거리
 
 def calculate_centroid(cluster_pcd):
-    """클러스터의 중심점을 계산"""
+    # 클러스터의 중심점을 계산
     points = np.asarray(cluster_pcd.points)
     return points.mean(axis=0)
 
 def match_bounding_boxes(prev_centroids, current_centroids, threshold=1.0):
-    """이전과 현재 클러스터 중심점을 비교하여 매칭"""
+    # 이전과 현재 클러스터 중심점을 비교하여 매칭
     matched_indices = []
     for i, prev_centroid in enumerate(prev_centroids):
         distances = np.linalg.norm(current_centroids - prev_centroid, axis=1)
@@ -173,8 +173,6 @@ for idx, pcd_file in enumerate(pcd_files):
     current_centroids = np.array([np.asarray(cluster.points).mean(axis=0) for cluster in clusters])
     current_bboxes = [cluster.get_axis_aligned_bounding_box() for cluster in clusters]
 
-
-
     # 노이즈를 제거하고 각 클러스터에 색상 지정
     colors = plt.get_cmap("tab20")(labels / (max_label + 1 if max_label > 0 else 1))
     colors[labels < 0] = 0  # 노이즈는 검정색으로 표시
@@ -228,7 +226,7 @@ for idx, pcd_file in enumerate(pcd_files):
                         bbox.color = (1, 0, 0)  # 빨간색
                         person_bboxes.append(bbox)
                         prev_centroids = current_centroids
-                        prev_bboxs = current_bboxes
+                        prev_bboxes = current_bboxes
         visualize_with_bounding_boxes(final_point, person_bboxes, output_path)
 
     else:  # 이후 PCD 파일 처리

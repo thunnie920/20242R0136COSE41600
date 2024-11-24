@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # 
 # file_path = "test_data/1727320101-665925967.pcd"
 # file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
-
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd\\pcd_000002.pcd"
 
 # pcd 파일 불러오고 시각화하는 함수
 def load_and_visualize_pcd(file_path, point_size=1.0):

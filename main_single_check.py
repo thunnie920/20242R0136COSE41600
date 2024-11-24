@@ -8,9 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 # file_path = "test_data/1727320101-665925967.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd\\pcd_000004.pcd"
 
-# file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
+#file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
