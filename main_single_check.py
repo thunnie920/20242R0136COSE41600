@@ -8,8 +8,7 @@ from sklearn.linear_model import LinearRegression
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 # file_path = "test_data/1727320101-665925967.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd\\pcd_000004.pcd"
-
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000254.pcd"
 #file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
 # PCD 파일 읽기
@@ -128,7 +127,7 @@ final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
 # 필터링 기준 1. 사람 탐지 필터링 기준
 min_points_in_cluster = 50   # 클러스터 내 최소 포인트 수
-max_points_in_cluster = 300  # 클러스터 내 최대 포인트 수
+max_points_in_cluster = 1000  # 클러스터 내 최대 포인트 수
 
 # 필터링 기준 2. 사람의 높이 (Z 값 범위)
 min_height = 1.5   # 최소 높이 (사람)
@@ -136,7 +135,7 @@ max_height = 2.0   # 최대 높이 (사람)
 
 # 필터링 기준 3. 사람의 너비 및 깊이 (XY 평면에서의 범위)
 min_size = 0.3     # 최소 너비/깊이
-max_size = 0.7     # 최대 너비/깊이
+max_size = 0.9     # 최대 너비/깊이
 
 # 필터링 기준 4. 너무 멀리 있는 객체는 탐지 안 함
 max_distance = 70.0   # 원점으로부터의 최대 거리
