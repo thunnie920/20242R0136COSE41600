@@ -8,10 +8,10 @@ from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
 
 # 경로 설정
-data_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd"  # PCD 파일들이 있는 폴더
+data_path = "E:\\Desktop\\selfdrivingCars\\data\\06_straight_crawl\\pcd"  # PCD 파일들이 있는 폴더
 # data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
-output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\01_straight_walk"  # 저장할 폴더
-# output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_2" 
+output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\06_straight_crawl_sample"  # 저장할 폴더
+# output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_3" 
 
 def calculate_centroid(cluster_pcd):
     # 클러스터의 중심점을 계산
@@ -71,14 +71,9 @@ def visualize_with_bounding_boxes(pcd, bounding_boxes, window_name="Filtered Clu
 # test_data 폴더의 모든 PCD 파일 처리
 pcd_files = [f for f in os.listdir(data_path) if f.endswith('.pcd')]
 
-# 초기화
-prev_bboxes = []  # 이전 바운딩 박스 리스트
-prev_centroids = []  # 이전 클러스터 중심점 리스트
-movement_threshold = 0.1  # 움직임으로 간주할 최소 거리
-movement_count_threshold = 3  # 이동으로 판단하기 위한 최소 이동 횟수
-
-initial_clusters = {}  # 클러스터 ID를 키로, 중심점 좌표를 값으로 저장
-moving_clusters = {}  # 클러스터 ID를 키로, 이동 횟수를 값으로 저장
+centroid_history = {}  # 이전 프레임의 중심점 정보를 저장할 딕셔너리
+bbox_history = {}  # 이전 프레임의 바운딩 박스 정보를 저장할 딕셔너리
+movement_threshold = 0.5  # 움직임 감지 임계값
 
 for idx, pcd_file in enumerate(pcd_files):
     input_path = os.path.join(data_path, pcd_file)
@@ -182,108 +177,34 @@ for idx, pcd_file in enumerate(pcd_files):
     colors[labels < 0] = 0  # 노이즈는 검정색으로 표시
     final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
-    if idx == 0:  # 첫 번째 프레임
+    if idx < 50:
+        # 50번째 프레임 이전에는 클러스터만 표시
+        visualize_with_bounding_boxes(final_point, current_bboxes, output_path)
+        # 현재 프레임 정보 저장
+        centroid_history[idx] = current_centroids
+        bbox_history[idx] = current_bboxes
+    else:
+        # 50번째 이후에는 현재 프레임과 50 프레임 전의 프레임 비교
+        compare_idx = idx - 50  # 비교 대상 프레임
+        if compare_idx in centroid_history:
+            previous_centroids = centroid_history[compare_idx]
+            previous_bboxes = bbox_history[compare_idx]
 
-        # 사람 탐지 필터링 기준
-        min_points_in_cluster = 50   # 클러스터 내 최소 포인트 수
-        max_points_in_cluster = 300  # 클러스터 내 최대 포인트 수
+            for curr_idx, curr_centroid in enumerate(current_centroids):
+                # 50 프레임 전의 중심점과 비교하여 움직임 감지
+                distances = np.linalg.norm(previous_centroids - curr_centroid, axis=1)
+                closest_prev_idx = np.argmin(distances)
+                movement = distances[closest_prev_idx]
 
-        # 사람의 높이 (Z 값 범위)
-        min_height = 1.5   # 최소 높이 (사람)
-        max_height = 2.0   # 최대 높이 (사람)
+                if movement > movement_threshold:
+                    print(f"Movement detected between frame {idx} and frame {compare_idx} in cluster {curr_idx}: {movement}")
+                    current_bboxes[curr_idx].color = (1, 0, 0)  # 움직임이 있는 클러스터는 빨간색으로 표시
 
-        # 사람의 너비 및 깊이 (XY 평면에서의 범위)
-        min_size = 0.3     # 최소 너비/깊이
-        max_size = 0.7     # 최대 너비/깊이
+        # 시각화 및 저장
+        visualize_with_bounding_boxes(final_point, current_bboxes, output_path)
 
-        max_distance = 70.0   # 원점으로부터의 최대 거리
-        aspect_ratio_threshold = 2.5  # Z축 길이 / XY 평면 크기의 최소 비율
-
-        filtered_centroids = []
-        filtered_bboxes = []
-
-        for i in range(max_label + 1):
-            cluster_indices = np.where(labels == i)[0]
-            if min_points_in_cluster <= len(cluster_indices) <= max_points_in_cluster:
-                cluster_pcd = final_point.select_by_index(cluster_indices)
-                points = np.asarray(cluster_pcd.points)
-
-                # Z 값 범위 확인
-                z_values = points[:, 2]
-                z_min = z_values.min()
-                z_max = z_values.max()
-                height_diff = z_max - z_min
-
-                # XY 평면에서의 너비 및 깊이 계산
-                x_min, y_min = points[:, 0].min(), points[:, 1].min()
-                x_max, y_max = points[:, 0].max(), points[:, 1].max()
-                width = x_max - x_min
-                depth = y_max - y_min
-                xy_size = max(width, depth)
-
-                 # 형태적 특징 필터링
-                if min_height <= height_diff <= max_height and min_size <= xy_size <= max_size:
-                    # 세로로 긴 형태 확인
-                    if height_diff / xy_size >= aspect_ratio_threshold:
-                        bbox = cluster_pcd.get_axis_aligned_bounding_box()
-                        bbox.color = (0, 0, 1)  # 파란색
-                        filtered_centroids.append(points.mean(axis=0))
-                        filtered_bboxes.append(bbox)
-        
-        # 필터링된 클러스터만 저장
-        prev_centroids = np.array(filtered_centroids)
-        prev_bboxes = filtered_bboxes
-        # 초기 프레임 시각화 저장
-        visualize_with_bounding_boxes(final_point, prev_bboxes, output_path)
-        print(f"Frame {idx}: Initial filtered clusters saved.")
-
-    elif 1 <= idx < 5:  # 1 ~ 4번째 프레임
-        new_prev_centroids = []
-        new_prev_bboxes = []
-
-        matched_indices = set()  # 이전 프레임에서 매칭된 현재 클러스터의 인덱스 저장
-
-        # 이전 클러스터와 현재 클러스터 매칭
-        for prev_idx, prev_centroid in enumerate(prev_centroids):
-            # 현재 클러스터와의 거리 계산
-            distances = np.linalg.norm(current_centroids - prev_centroid, axis=1)
-            closest_curr_idx = np.argmin(distances)
-            movement = distances[closest_curr_idx]
-
-            # 이동 임계값 확인
-            if movement > movement_threshold:
-                print(f"Movement detected for previous cluster {prev_idx}: {movement}")
-                current_bboxes[closest_curr_idx].color = (0, 0, 1)  # 이동 클러스터: 파란색 표시
-
-                # 이동이 감지된 클러스터만 유지
-                new_prev_centroids.append(current_centroids[closest_curr_idx])
-                new_prev_bboxes.append(current_bboxes[closest_curr_idx])
-                matched_indices.add(closest_curr_idx)  # 매칭된 인덱스 기록
-            else:
-                print(f"Cluster {prev_idx} is stationary and will be removed.")
-
-        # 새로 등장한 클러스터 추가
-        for curr_idx, curr_centroid in enumerate(current_centroids):
-            if curr_idx not in matched_indices:  # 매칭되지 않은 클러스터만 추가
-                print(f"New cluster detected: {curr_idx}")
-                new_prev_centroids.append(curr_centroid)
-                new_prev_bboxes.append(current_bboxes[curr_idx])
-
-        # prev 리스트를 업데이트
-        prev_centroids = np.array(new_prev_centroids)
-        prev_bboxes = new_prev_bboxes
-
-        # 움직임 있는 클러스터 시각화 저장
-        visualize_with_bounding_boxes(final_point, prev_bboxes, output_path)
-        print(f"Frame {idx}: Moving clusters saved.")
-
-    else:  # 5번째 프레임 이후
-        # prev에 남아 있는 클러스터를 빨간색으로 표시하고 시각화
-        for bbox in prev_bboxes:
-            bbox.color = (1, 0, 0)  # 빨간색으로 표시
-
-        # 시각화 및 결과 저장
-        visualize_with_bounding_boxes(final_point, prev_bboxes, output_path)
-
+        # 현재 프레임 정보 저장
+        centroid_history[idx] = current_centroids
+        bbox_history[idx] = current_bboxes
 
 print("All visualizations with bounding boxes have been saved.")

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\data\\03_straight_crawl\\pcd\\pcd_000002.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000002.pcd"
 
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
@@ -38,7 +38,7 @@ colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
 colors[labels < 0] = 0  # 노이즈는 검정색으로 표시
 final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
-camera_param_file = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\camera_params.json"
+camera_param_file = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\camera_params_04050607.json"
 
 
 def save_camera_parameters(pcd, file_name=camera_param_file, point_size=1.0, width=1920, height=1080):
