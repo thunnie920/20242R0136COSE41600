@@ -9,9 +9,9 @@ from sklearn.linear_model import LinearRegression
 from scipy.spatial import cKDTree
 
 # 경로 설정
-data_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd"  # PCD 파일들이 있는 폴더
+data_path = "E:\\Desktop\\selfdrivingCars\\data\\02_straight_duck_walk\\pcd"  # PCD 파일들이 있는 폴더
 # data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
-output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\04_zigzag_walk"  # 저장할 폴더
+output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\02_straight_duck_walk"  # 저장할 폴더
 # output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_3" 
 
 def calculate_centroid(cluster_pcd):

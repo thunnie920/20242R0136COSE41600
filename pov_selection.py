@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000002.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd\\pcd_000188.pcd"
 
 """
 이미지 캡쳐 각도 설정
