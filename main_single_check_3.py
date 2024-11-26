@@ -12,6 +12,10 @@ file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000254
 
 #file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
+"""
+클러스터 구분 확인용
+"""
+
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
 points = np.asarray(original_pcd.points)
@@ -28,31 +32,13 @@ distances, _ = nbrs.kneighbors(sampled_points)
 mean_distance = np.mean(distances[:, 1])
 
 # voxel_size를 평균 거리의 비율로 설정
-voxel_size = mean_distance * 0.25
+voxel_size = mean_distance * 0.1
 print(f"Calculated voxel_size: {voxel_size}")
 
 # Voxel Downsampling 수행
 # voxel_size = 0.2  # 필요에 따라 voxel 크기를 조정하세요.
 downsample_pcd = original_pcd.voxel_down_sample(voxel_size=voxel_size)
 
-"""
-# 탐색할 nb_points 값 범위
-nb_points_range = range(2, 15)
-radius = 1.2  # 고정된 반경
-
-optimal_nb_points = 0
-best_ratio = 0
-
-for nb_points in nb_points_range:
-    _, ind = downsample_pcd.remove_radius_outlier(nb_points=nb_points, radius=radius)
-    inlier_ratio = len(ind) / len(downsample_pcd.points)  # 이상치 제거 후 남은 점의 비율
-
-    if inlier_ratio > best_ratio:
-        best_ratio = inlier_ratio
-        optimal_nb_points = nb_points
-
-print(f"최적의 nb_points: {optimal_nb_points}, 비율: {best_ratio:.2f}")
-"""
 
 # Radius Outlier Removal (ROR) 적용
 #cl, ind = downsample_pcd.remove_radius_outlier(nb_points=optimal_nb_points, radius=1.2)
@@ -91,8 +77,8 @@ final_point = ror_pcd.select_by_index(inliers, invert=True)
 points = np.asarray(final_point.points)
 
 # 기존 DBSCAN 적용 코드 전에 파라미터 탐색 추가
-eps_values = [0.2, 0.3, 0.4, 0.5]
-min_points_values = [5, 10, 15, 20]
+eps_values = [0.1, 0.2, 0.3]  # 기존보다 작은 값으로 설정
+min_points_values = [5, 10]  # 클러스터를 더 세밀하게 정의
 
 best_labels = None
 best_eps = 0
@@ -126,10 +112,13 @@ colors = plt.get_cmap("tab20")(labels / (max_label + 1 if max_label > 0 else 1))
 colors[labels < 0] = 256  # 노이즈는 검정색으로 표시
 final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
+# 사람의 높이 (Z 값 범위)
+min_height = 1.5   # 최소 높이 (사람)
+max_height = 2.0   # 최대 높이 (사람)
 
-# 필터링 기준 1: 클러스터 내 포인트 수만 기준으로 필터링
-min_points_in_cluster = 50   # 클러스터 내 최소 포인트 수
-max_points_in_cluster = 2000  # 클러스터 내 최대 포인트 수
+# 사람의 너비 및 깊이 (XY 평면에서의 범위)
+min_size = 0.3     # 최소 너비/깊이
+max_size = 0.9     # 최대 너비/깊이
 
 # 바운딩 박스를 저장할 리스트
 person_bboxes = []
@@ -137,22 +126,30 @@ person_bboxes = []
 for i in range(max_label + 1):
     cluster_indices = np.where(labels == i)[0]
     cluster_pcd = final_point.select_by_index(cluster_indices)
+    points = np.asarray(cluster_pcd.points)
+    
+    z_min, z_max = points[:, 2].min(), points[:, 2].max()
+    x_min, x_max = points[:, 0].min(), points[:, 0].max()
+    y_min, y_max = points[:, 1].min(), points[:, 1].max()
+    
+    height = z_max - z_min
+    width = x_max - x_min
+    depth = y_max - y_min
+    
+    if min_height <= height <= max_height and min_size <= width <= max_size:
+        bbox = cluster_pcd.get_axis_aligned_bounding_box()
+        bbox.color = (1, 0, 0)  # 빨간색
+        person_bboxes.append(bbox)
 
-    # 바운딩 박스 생성
-    bbox = cluster_pcd.get_axis_aligned_bounding_box()  # AABB 생성
-    bbox.color = (1, 0, 0)  # 빨간색
-    person_bboxes.append(bbox)
-
-# 시각화 함수 (기존과 동일)
 def apply_camera_view(vis, filename="camera_params.json"):
-    try:
-        camera_params = o3d.io.read_pinhole_camera_parameters(filename)
-        view_control = vis.get_view_control()
-        view_control.convert_from_pinhole_camera_parameters(camera_params, allow_arbitrary=True)
-        print(f"Camera parameters loaded from {filename}")
-    except Exception as e:
-        print(f"Could not apply saved camera view: {e}")
-        print("Using default view.")
+    # 저장된 카메라 매개변수 불러오기
+    camera_params = o3d.io.read_pinhole_camera_parameters(filename)
+    vis.create_window(width=camera_params.intrinsic.width, height=camera_params.intrinsic.height)
+    
+    # ViewControl에 적용
+    view_control = vis.get_view_control()
+    view_control.convert_from_pinhole_camera_parameters(camera_params, allow_arbitrary=True)
+    print(f"Camera parameters loaded from {filename}")
 
 def visualize_with_bounding_boxes(pcd, bounding_boxes, window_name="Filtered Clusters and Bounding Boxes", point_size=1.0, width=1920, height=1080, filename="camera_params.json"):
     vis = o3d.visualization.Visualizer()
@@ -175,5 +172,5 @@ def visualize_with_bounding_boxes(pcd, bounding_boxes, window_name="Filtered Clu
     vis.run()
     vis.destroy_window()
 
-# 최종 시각화 실행
+# 시각화 (포인트 크기를 원하는 크기로 조절 가능)
 visualize_with_bounding_boxes(final_point, person_bboxes, point_size=2.0, width=1920, height=1080, filename="camera_params.json")

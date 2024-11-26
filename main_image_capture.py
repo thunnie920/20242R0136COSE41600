@@ -7,6 +7,9 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
 
+"""
+baseline
+"""
 # 경로 설정
 #data_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd"  # PCD 파일들이 있는 폴더
 data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"

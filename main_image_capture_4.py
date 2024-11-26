@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
-
+"""
+초기 클러스터링 기준 없이 모든 클러스터 살펴보기
+"""
 # 경로 설정
 data_path = "E:\\Desktop\\selfdrivingCars\\data\\06_straight_crawl\\pcd"  # PCD 파일들이 있는 폴더
 # data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
@@ -73,7 +75,6 @@ pcd_files = [f for f in os.listdir(data_path) if f.endswith('.pcd')]
 
 centroid_history = {}  # 이전 프레임의 중심점 정보를 저장할 딕셔너리
 bbox_history = {}  # 이전 프레임의 바운딩 박스 정보를 저장할 딕셔너리
-movement_threshold = 0.5  # 움직임 감지 임계값
 
 for idx, pcd_file in enumerate(pcd_files):
     input_path = os.path.join(data_path, pcd_file)
@@ -196,7 +197,7 @@ for idx, pcd_file in enumerate(pcd_files):
                 closest_prev_idx = np.argmin(distances)
                 movement = distances[closest_prev_idx]
 
-                if movement > movement_threshold:
+                if movement > 1:
                     print(f"Movement detected between frame {idx} and frame {compare_idx} in cluster {curr_idx}: {movement}")
                     current_bboxes[curr_idx].color = (1, 0, 0)  # 움직임이 있는 클러스터는 빨간색으로 표시
 

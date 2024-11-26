@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 # file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000002.pcd"
 
+"""
+이미지 캡쳐 각도 설정
+"""
+
 # PCD 파일 읽기
 original_pcd = o3d.io.read_point_cloud(file_path)
 
