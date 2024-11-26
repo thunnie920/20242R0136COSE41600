@@ -94,7 +94,7 @@ for idx, pcd_file in enumerate(pcd_files):
     mean_distance = np.mean(distances[:, 1])
 
     # voxel_size를 평균 거리의 비율로 설정
-    voxel_size = mean_distance * 0.5
+    voxel_size = mean_distance * 0.1
     print(f"Calculated voxel_size: {voxel_size}")
 
     # Voxel Downsampling 수행
@@ -177,7 +177,7 @@ for idx, pcd_file in enumerate(pcd_files):
     # 조건에 따라 클러스터 필터링
     min_height = 1.0  # 최소 높이 (사람)
     max_height = 2.0  # 최대 높이 (사람)
-    min_size = 0.2    # 최소 너비/깊이
+    min_size = 0.1    # 최소 너비/깊이
     max_size = 0.9    # 최대 너비/깊이
     
     # 필터링된 클러스터만 처리
@@ -211,7 +211,12 @@ for idx, pcd_file in enumerate(pcd_files):
 
     # 시각화와 비교
     if idx < 50:
+        # 초기값을 파란색으로 설정
+        for bbox in filtered_bboxes:
+            bbox.color = (0, 0, 1) # 초기 클러스터
+            
         visualize_with_bounding_boxes(final_point, filtered_bboxes, output_path)
+
     else:
         # 50 프레임 전과 비교
         compare_idx = idx - 50
@@ -225,7 +230,7 @@ for idx, pcd_file in enumerate(pcd_files):
                 closest_prev_idx = np.argmin(distances)
                 movement = distances[closest_prev_idx]
 
-                if movement > 1:
+                if movement > 2:
                     print(f"Movement detected between frame {idx} and frame {compare_idx} in cluster {curr_idx}: {movement}")
                     filtered_bboxes[curr_idx].color = (1, 0, 0)  # 움직임이 있는 클러스터는 빨간색으로 표시
 

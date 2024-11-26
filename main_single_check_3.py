@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 
 # pcd 파일 불러오기, 필요에 맞게 경로 수정
 # file_path = "test_data/1727320101-665925967.pcd"
-file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000254.pcd"
+file_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd\\pcd_000199.pcd"
 
 #file_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data\\1727320101-961578277.pcd"
 
@@ -113,11 +113,11 @@ colors[labels < 0] = 256  # 노이즈는 검정색으로 표시
 final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
 # 사람의 높이 (Z 값 범위)
-min_height = 1.5   # 최소 높이 (사람)
+min_height = 0.5   # 최소 높이 (사람) 
 max_height = 2.0   # 최대 높이 (사람)
 
 # 사람의 너비 및 깊이 (XY 평면에서의 범위)
-min_size = 0.3     # 최소 너비/깊이
+min_size = 0.1     # 최소 너비/깊이
 max_size = 0.9     # 최대 너비/깊이
 
 # 바운딩 박스를 저장할 리스트

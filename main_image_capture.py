@@ -9,12 +9,13 @@ from sklearn.linear_model import LinearRegression
 
 """
 baseline
+과거 비교 로직 X
 """
 # 경로 설정
-#data_path = "E:\\Desktop\\selfdrivingCars\\data\\01_straight_walk\\pcd"  # PCD 파일들이 있는 폴더
-data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
-#output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\01_straight_walk"  # 저장할 폴더
-output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_try" 
+data_path = "E:\\Desktop\\selfdrivingCars\\data\\04_zigzag_walk\\pcd"  # PCD 파일들이 있는 폴더
+#data_path = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1_tutorial\\test_data"
+output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\04_zigzag_walk"  # 저장할 폴더
+#output_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\test_data_try" 
 
 def apply_camera_view(vis, filename="camera_params.json"):
     # 저장된 카메라 매개변수 불러오기
@@ -177,18 +178,19 @@ for pcd_file in pcd_files:
     colors = plt.get_cmap("tab20")(labels / (max_label + 1 if max_label > 0 else 1))
     colors[labels < 0] = 0  # 노이즈는 검정색으로 표시
     final_point.colors = o3d.utility.Vector3dVector(colors[:, :3])
-
+    """
     # 사람 탐지 필터링 기준
     min_points_in_cluster = 50   # 클러스터 내 최소 포인트 수
     max_points_in_cluster = 300  # 클러스터 내 최대 포인트 수
-
+    """
+    
     # 사람의 높이 (Z 값 범위)
-    min_height = 1.5   # 최소 높이 (사람)
+    min_height = 0.5   # 최소 높이 (사람)
     max_height = 2.0   # 최대 높이 (사람)
 
     # 사람의 너비 및 깊이 (XY 평면에서의 범위)
-    min_size = 0.3     # 최소 너비/깊이
-    max_size = 0.7     # 최대 너비/깊이
+    min_size = 0.1     # 최소 너비/깊이
+    max_size = 0.9     # 최대 너비/깊이
 
     max_distance = 70.0   # 원점으로부터의 최대 거리
     aspect_ratio_threshold = 2.5  # Z축 길이 / XY 평면 크기의 최소 비율
@@ -199,30 +201,21 @@ for pcd_file in pcd_files:
 
     for i in range(max_label + 1):
         cluster_indices = np.where(labels == i)[0]
-        if min_points_in_cluster <= len(cluster_indices) <= max_points_in_cluster:
-            cluster_pcd = final_point.select_by_index(cluster_indices)
-            points = np.asarray(cluster_pcd.points)
-
-            # Z 값 범위 확인
-            z_values = points[:, 2]
-            z_min = z_values.min()
-            z_max = z_values.max()
-            height_diff = z_max - z_min
-
-            # XY 평면에서의 너비 및 깊이 계산
-            x_min, y_min = points[:, 0].min(), points[:, 1].min()
-            x_max, y_max = points[:, 0].max(), points[:, 1].max()
-            width = x_max - x_min
-            depth = y_max - y_min
-            xy_size = max(width, depth)
-
-             # 형태적 특징 필터링
-            if min_height <= height_diff <= max_height and min_size <= xy_size <= max_size:
-                # 세로로 긴 형태 확인
-                if height_diff / xy_size >= aspect_ratio_threshold:
-                    bbox = cluster_pcd.get_axis_aligned_bounding_box()
-                    bbox.color = (1, 0, 0)  # 빨간색
-                    person_bboxes.append(bbox)
+        cluster_pcd = final_point.select_by_index(cluster_indices)
+        points = np.asarray(cluster_pcd.points)
+    
+        z_min, z_max = points[:, 2].min(), points[:, 2].max()
+        x_min, x_max = points[:, 0].min(), points[:, 0].max()
+        y_min, y_max = points[:, 1].min(), points[:, 1].max()
+    
+        height = z_max - z_min
+        width = x_max - x_min
+        depth = y_max - y_min
+    
+        if min_height <= height <= max_height and min_size <= width <= max_size:
+            bbox = cluster_pcd.get_axis_aligned_bounding_box()
+            bbox.color = (1, 0, 0)  # 빨간색
+            person_bboxes.append(bbox)
 
     visualize_with_bounding_boxes(final_point, person_bboxes, output_path)
 
