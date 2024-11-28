@@ -247,7 +247,7 @@ for idx, pcd_file in enumerate(pcd_files):
     bbox_history[idx] = filtered_bboxes
 
     # 시각화와 비교
-    if idx < 50:
+    if idx < 25:
         # 초기값을 파란색으로 설정
         for bbox in filtered_bboxes:
             bbox.color = (0, 0, 1) # 초기 클러스터
@@ -255,16 +255,12 @@ for idx, pcd_file in enumerate(pcd_files):
         visualize_with_bounding_boxes(final_point, filtered_bboxes, output_path)
 
     else:
-        # 50 프레임 전과 비교
-        compare_idx = idx - 50
+        # 25 프레임 전과 비교
+        compare_idx = idx - 25
         if compare_idx in centroid_history:
             previous_centroids = centroid_history[compare_idx]
             previous_bboxes = bbox_history[compare_idx]
             
-            # 새로운 클러스터 저장용 리스트
-            new_bboxes = []
-            new_centroids = []
-
             for curr_idx, curr_centroid in enumerate(filtered_centroids):
                 # 움직임 감지
                 distances = np.linalg.norm(previous_centroids - curr_centroid, axis=1)

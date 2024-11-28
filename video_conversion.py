@@ -2,8 +2,8 @@ import cv2
 import os
 
 # 경로 설정
-image_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\04_zigzag_walk"
-output_video = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\converted_video\\04_zigzag_walk.mp4"  # 생성할 비디오 파일 이름
+image_folder = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\visualized_pcd\\02_straight_duck_walk"
+output_video = "E:\\Desktop\\selfdrivingCars\\COSE416_HW1\\converted_video\\02_straight_duck_walk.mp4"  # 생성할 비디오 파일 이름
 fps = 10  # 초당 프레임 수 (FPS)
 
 def create_video_from_images(image_folder, output_video, fps=30):
